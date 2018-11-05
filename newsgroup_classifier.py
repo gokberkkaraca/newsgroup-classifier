@@ -53,7 +53,7 @@ sum_tjy1 = 0
 for word in range(vocab_size):
     tjy1 = 0
     for email in set_1:
-        tjy1 = email[word]
+        tjy1 += email[word]
     qjy1.append(tjy1)
     sum_tjy1 += tjy1
 qjy1 = list(map(lambda tjy1: (tjy1 + 1)/(sum_tjy1 + vocab_size), qjy1))
