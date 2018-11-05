@@ -1,4 +1,4 @@
-from math import log, inf
+from math import log, log2, inf
 
 training_feature_vectors = []
 with open('data/question-4-train-features.csv') as f:
@@ -92,4 +92,28 @@ result = list(map(lambda x: 1 if x[0] == x[1] else 0, result))
 accuracy = sum(result) / len(result)
 print(accuracy)
 
+index_mi_score_tuples = []
+for t in range(vocab_size):
+    for c in [0,1]:
+        
+        n11 = len(list(filter(lambda x: x[t] != 0 and training_label_vectors[t] == c, training_feature_vectors)))
+        n10 = len(list(filter(lambda x: x[t] != 0 and training_label_vectors[t] != c, training_feature_vectors)))
+        n01 = len(list(filter(lambda x: x[t] == 0 and training_label_vectors[t] == c, training_feature_vectors)))
+        n00 = len(list(filter(lambda x: x[t] == 0 and training_label_vectors[t] != c, training_feature_vectors)))
+        
+        print(n11, n10, n01, n00)
 
+        n1dot = n10 + n11
+        ndot1 = n01 + n11
+        n0dot = n01 + n00
+        ndot0 = n10 + n00
+
+        n = n00 + n01 + n10 + n11
+
+        mi_term1 = n11/n * log2(n*n11/(n1dot*ndot1))
+        mi_term2 = n01/n * log2(n*n01/(n0dot*ndot1))
+        mi_term3 = n10/n * log2(n*n10/(n1dot*ndot0))
+        mi_term4 = n00/n * log2(n*n00/(n0dot*ndot0))
+
+        mi_score = mi_term1 + mi_term2 + mi_term3 + mi_term4
+        index_mi_score_tuples.append(t, mi_score)
