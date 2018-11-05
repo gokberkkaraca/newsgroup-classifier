@@ -26,6 +26,8 @@ with open('data/question-4-test-labels.csv') as f:
 prob_class_is_0 = len(list(filter(lambda x: x == 0, training_label_vectors))) / len(training_label_vectors)
 prob_class_is_1 = len(list(filter(lambda x: x == 1, training_label_vectors))) / len(training_label_vectors)
 
+print(prob_class_is_0, prob_class_is_1)
+
 set_0 = []
 set_1 = []
 for i in range(len(training_feature_vectors)):
@@ -44,7 +46,7 @@ for word in range(vocab_size):
         tjy0 += email[word]
     qjy0.append(tjy0)
     sum_tjy0 += tjy0
-qjy0 = list(map(lambda tjy0: tjy0/sum_tjy0, qjy0))
+qjy0 = list(map(lambda tjy0: (tjy0 + 1)/(sum_tjy0 + vocab_size), qjy0))
 
 qjy1 = []
 sum_tjy1 = 0
@@ -54,7 +56,7 @@ for word in range(vocab_size):
         tjy1 = email[word]
     qjy1.append(tjy1)
     sum_tjy1 += tjy1
-qjy1 = list(map(lambda tjy1: tjy1/sum_tjy1, qjy1))
+qjy1 = list(map(lambda tjy1: (tjy1 + 1)/(sum_tjy1 + vocab_size), qjy1))
 
 # Test data
 test_prediction_results = []
