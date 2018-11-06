@@ -26,8 +26,6 @@ with open('data/question-4-test-labels.csv') as f:
 prob_class_is_0 = len(list(filter(lambda x: x == 0, training_label_vectors))) / len(training_label_vectors)
 prob_class_is_1 = len(list(filter(lambda x: x == 1, training_label_vectors))) / len(training_label_vectors)
 
-print(prob_class_is_0, prob_class_is_1)
-
 set_0 = []
 set_1 = []
 for i in range(len(training_feature_vectors)):
@@ -90,30 +88,42 @@ for document in test_feature_vectors:
 result = list(zip(test_prediction_results, test_label_vectors))
 result = list(map(lambda x: 1 if x[0] == x[1] else 0, result))
 accuracy = sum(result) / len(result)
-print(accuracy)
+print("Acccuracy:", accuracy)
 
-index_mi_score_tuples = []
+noise = 0.0000001
+def calculate_mi_score(given_feature, given_class):
+    n11 = n10 = n01 = n00 = 0
+    for document in range(len(training_feature_vectors)):
+        if (training_feature_vectors[document][given_feature] > 0 and training_label_vectors[document] == given_class):
+            n11 = n11 + 1
+        elif (training_feature_vectors[document][given_feature] > 0 and training_label_vectors[document] != given_class):
+            n10 = n10 + 1
+        elif (training_feature_vectors[document][given_feature] == 0 and training_label_vectors[document] == given_class):
+            n01 = n01 + 1
+        elif (training_feature_vectors[document][given_feature] == 0 and training_label_vectors[document] != given_class):
+            n00 = n00 + 1
+
+    n1dot = n10 + n11
+    ndot1 = n01 + n11
+    n0dot = n01 + n00
+    ndot0 = n10 + n00
+
+    n = n00 + n01 + n10 + n11
+    
+    mi_term1 = n11/n * log2((n*n11 + noise)/(n1dot*ndot1 + noise))
+    mi_term2 = n01/n * log2((n*n01 + noise)/(n0dot*ndot1 + noise))
+    mi_term3 = n10/n * log2((n*n10 + noise)/(n1dot*ndot0 + noise))
+    mi_term4 = n00/n * log2((n*n00 + noise)/(n0dot*ndot0 + noise))
+
+    mi_score = mi_term1 + mi_term2 + mi_term3 + mi_term4
+    return mi_score
+
+score_list=[[],[]]
 for t in range(vocab_size):
     for c in [0,1]:
-        
-        n11 = len(list(filter(lambda x: x[t] != 0 and training_label_vectors[t] == c, training_feature_vectors)))
-        n10 = len(list(filter(lambda x: x[t] != 0 and training_label_vectors[t] != c, training_feature_vectors)))
-        n01 = len(list(filter(lambda x: x[t] == 0 and training_label_vectors[t] == c, training_feature_vectors)))
-        n00 = len(list(filter(lambda x: x[t] == 0 and training_label_vectors[t] != c, training_feature_vectors)))
-        
-        print(n11, n10, n01, n00)
+        score_list[c].append((t, calculate_mi_score(t,c)))
 
-        n1dot = n10 + n11
-        ndot1 = n01 + n11
-        n0dot = n01 + n00
-        ndot0 = n10 + n00
-
-        n = n00 + n01 + n10 + n11
-
-        mi_term1 = n11/n * log2(n*n11/(n1dot*ndot1))
-        mi_term2 = n01/n * log2(n*n01/(n0dot*ndot1))
-        mi_term3 = n10/n * log2(n*n10/(n1dot*ndot0))
-        mi_term4 = n00/n * log2(n*n00/(n0dot*ndot0))
-
-        mi_score = mi_term1 + mi_term2 + mi_term3 + mi_term4
-        index_mi_score_tuples.append(t, mi_score)
+top_10 = sorted(score_list[0], key=lambda x: x[1], reverse=True)[0:10]
+print("\nTop 10 features")
+for item in top_10:
+    print("Index: {} \t Score: {}".format(item[0], item[1]))
