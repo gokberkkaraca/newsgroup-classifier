@@ -133,8 +133,8 @@ feature_information_order = list(map(lambda x: x[0], feature_information_order))
 
 accuracy_results = []
 num_removed_list = []
-num_removed = 26400
-step_size = 10
+num_removed = 0
+step_size = 100
 removed_features = feature_information_order[0:num_removed]
 while (num_removed < vocab_size):
 
