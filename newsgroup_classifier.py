@@ -1,5 +1,6 @@
 from math import log, log2, inf
 
+# Read data from files
 training_feature_vectors = []
 with open('data/question-4-train-features.csv') as f:
     for line in f.read().splitlines():
@@ -11,6 +12,7 @@ with open('data/question-4-train-labels.csv') as f:
     for line in f.read().splitlines():
         training_label_vectors.append(int(line))
 
+# Seperate space and medical emails
 test_feature_vectors = []
 with open('data/question-4-test-features.csv') as f:
     for line in f.read().splitlines():
@@ -90,6 +92,7 @@ result = list(map(lambda x: 1 if x[0] == x[1] else 0, result))
 accuracy = sum(result) / len(result)
 print("Acccuracy:", accuracy)
 
+# Calculate mutual information scores and print top 10
 noise = 0.0000001
 def calculate_mi_score(given_feature, given_class):
     n11 = n10 = n01 = n00 = 0
@@ -131,6 +134,7 @@ for item in top_10:
 feature_information_order = sorted(score_list[0], key=lambda x: x[1])
 feature_information_order = list(map(lambda x: x[0], feature_information_order))
 
+# Redo the experiment by using mutual information scores
 accuracy_results = []
 num_removed_list = []
 num_removed = 0
