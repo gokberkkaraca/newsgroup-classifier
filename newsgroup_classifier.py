@@ -127,3 +127,52 @@ top_10 = sorted(score_list[0], key=lambda x: x[1], reverse=True)[0:10]
 print("\nTop 10 features")
 for item in top_10:
     print("Index: {} \t Score: {}".format(item[0], item[1]))
+
+feature_information_order = sorted(score_list[0], key=lambda x: x[1])
+feature_information_order = list(map(lambda x: x[0], feature_information_order))
+
+num_removed = 6000
+step_size = 3000
+removed_features = feature_information_order[0:num_removed]
+while (num_removed < vocab_size):
+    print("Num removed", num_removed)
+    # Test data
+    test_prediction_results = []
+    count = 0
+    for document in test_feature_vectors:
+        print("New doc", count)
+        count = count + 1
+        likelihood_0 = 0
+        likelihood_1 = 0
+
+        for word in range(vocab_size):
+            if word in removed_features:
+                continue
+
+            if document[word] == 0:
+                likelihood_0 += 0
+                likelihood_1 += 0
+            else:
+                if qjy0[word] == 0:
+                    likelihood_0 += -inf
+                else:
+                    likelihood_0 += document[word] * log(qjy0[word])
+                
+                if qjy1[word] == 0:
+                    likelihood_1 += -inf
+                else:
+                    likelihood_1 += document[word] * log(qjy1[word])
+
+        belongs_to_0 = log(prob_class_is_0) + likelihood_0
+        belongs_to_1 = log(prob_class_is_1) + likelihood_1
+
+        if belongs_to_1 > belongs_to_0:
+            test_prediction_results.append(1)
+        else:
+            test_prediction_results.append(0)
+
+    result = list(zip(test_prediction_results, test_label_vectors))
+    result = list(map(lambda x: 1 if x[0] == x[1] else 0, result))
+    accuracy = sum(result) / len(result)
+    print("Acccuracy:", accuracy)
+    num_removed = num_removed + step_size
