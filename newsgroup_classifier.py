@@ -131,16 +131,43 @@ for item in top_10:
 feature_information_order = sorted(score_list[0], key=lambda x: x[1])
 feature_information_order = list(map(lambda x: x[0], feature_information_order))
 
-num_removed = 6000
-step_size = 3000
+accuracy_results = []
+num_removed_list = []
+num_removed = 26400
+step_size = 10
 removed_features = feature_information_order[0:num_removed]
 while (num_removed < vocab_size):
-    print("Num removed", num_removed)
+
+    qjy0 = []
+    sum_tjy0 = 0
+    for word in range(vocab_size):
+        if word in removed_features:
+            continue
+
+        tjy0 = 0
+        for email in set_0:
+            tjy0 += email[word]
+        qjy0.append(tjy0)
+        sum_tjy0 += tjy0
+    qjy0 = list(map(lambda tjy0: (tjy0 + 1)/(sum_tjy0 + vocab_size - num_removed), qjy0))
+
+    qjy1 = []
+    sum_tjy1 = 0
+    for word in range(vocab_size):
+        if word in removed_features:
+            continue
+
+        tjy1 = 0
+        for email in set_1:
+            tjy1 += email[word]
+        qjy1.append(tjy1)
+        sum_tjy1 += tjy1
+    qjy1 = list(map(lambda tjy1: (tjy1 + 1)/(sum_tjy1 + vocab_size - num_removed), qjy1))
+
     # Test data
     test_prediction_results = []
     count = 0
     for document in test_feature_vectors:
-        print("New doc", count)
         count = count + 1
         likelihood_0 = 0
         likelihood_1 = 0
@@ -153,15 +180,8 @@ while (num_removed < vocab_size):
                 likelihood_0 += 0
                 likelihood_1 += 0
             else:
-                if qjy0[word] == 0:
-                    likelihood_0 += -inf
-                else:
-                    likelihood_0 += document[word] * log(qjy0[word])
-                
-                if qjy1[word] == 0:
-                    likelihood_1 += -inf
-                else:
-                    likelihood_1 += document[word] * log(qjy1[word])
+                likelihood_0 += document[word] * log(qjy0[word])
+                likelihood_1 += document[word] * log(qjy1[word])
 
         belongs_to_0 = log(prob_class_is_0) + likelihood_0
         belongs_to_1 = log(prob_class_is_1) + likelihood_1
@@ -174,5 +194,11 @@ while (num_removed < vocab_size):
     result = list(zip(test_prediction_results, test_label_vectors))
     result = list(map(lambda x: 1 if x[0] == x[1] else 0, result))
     accuracy = sum(result) / len(result)
-    print("Acccuracy:", accuracy)
+    accuracy_results.append(accuracy)
+    num_removed_list.append(num_removed)
     num_removed = num_removed + step_size
+
+# import matplotlib.pyplot as plt
+# plt.plot(num_removed_list, accuracy_results)
+# plt.ylim(0.9, 1)
+# plt.show()
